@@ -73,6 +73,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manip
 .amt small{font-size:16px;font-weight:600;margin-left:2px}
 .now{font-size:14px;font-weight:700}
 .now[data-j="A"]{color:var(--a)} .now[data-j="B"]{color:var(--b)} .now[data-j="C"]{color:var(--c)}
+.undo{align-self:flex-start;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700}
 
 /* まとめて */
 .bulk{display:flex;gap:8px;align-items:stretch}
@@ -150,6 +151,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manip
     <div class="meta"><span class="chip" id="cKamoku"></span><span id="cDate"></span><span id="cPay"></span><span class="no" id="cNo"></span></div>
     <div class="tekiyo" id="cTekiyo"></div>
     <div class="now" id="cNow"></div>
+    <button class="undo" id="undo" hidden>↺ 判定を取り消す（未判定に戻す）</button>
     <div class="amt"><span id="cAmt"></span><small>円</small></div>
   </article>
 
@@ -302,6 +304,7 @@ function render(){
   var j=J[cur]; $('card').dataset.j=j; $('cNow').dataset.j=j;
   var pa=P[cur];
   $('cNow').textContent = j==='-' ? '' : pa ? '判定ずみ：'+label(j)+'／一部だけ経費でない '+yen(pa)+'円（経費 '+yen(r[6]-pa)+'円）' : '判定ずみ：'+label(j)+'（押し直すと変えられます）';
+  $('undo').hidden = j==='-';
   $('openPart').textContent = pa ? '一部の金額を直す（今：経費でない '+yen(pa)+'円）' : '一部だけ経費でない（金額を入れる）';
   $('prev').disabled = hist.length===0;
   var a=0,b=0,c=0,open=0,openF=0,totF=0;
@@ -377,6 +380,7 @@ function start(){
 $('unlock').addEventListener('click',function(){ tryUnlock($('pass').value,false); });
 $('pass').addEventListener('keydown',function(e){ if(e.key==='Enter') tryUnlock($('pass').value,false); });
 $('abc').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) judge(b.dataset.v); });
+$('undo').addEventListener('click',function(){ if(J[cur]==='-') return; J[cur]='-'; delete P[cur]; hideBulk(); save(); render(); toast('判定を取り消しました（残りが1件ふえました）'); });
 $('bulkDo').addEventListener('click',doBulk); $('bulkNo').addEventListener('click',hideBulk);
 $('prev').addEventListener('click',function(){ if(hist.length){ var i=hist.pop(); cur=i; hideBulk(); save(); render(); } });
 $('skip').addEventListener('click',function(){ var nx=nextOpen(cur); if(nx<0||nx===cur){ for(var k=1;k<=N;k++){ var i=(cur+k)%N; if(inFilter(i)){ nx=i; break; } } } if(nx>=0) go(nx); });
